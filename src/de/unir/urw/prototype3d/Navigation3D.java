@@ -6,18 +6,18 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 
 import com.threed.jpct.Logger;
-import com.threed.jpct.example.R;
 
 public class Navigation3D extends Activity {
-
-    // Used to handle pause and resume...
     private GLSurfaceView glSurfaceView;
-    private NavigationRenderer navigationRenderer = null;
+    private NavigationRenderer navigationRenderer;
+    private TouchRotation touchRotation;
+    
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        navigationRenderer = new NavigationRenderer(getResources().getDrawable(R.drawable.ground));
+        navigationRenderer = new NavigationRenderer();
+        touchRotation = new TouchRotation(navigationRenderer);
 
         glSurfaceView = new GLSurfaceView(getApplication());
         glSurfaceView.setRenderer(navigationRenderer);
@@ -26,21 +26,7 @@ public class Navigation3D extends Activity {
     }
 
     public boolean onTouchEvent(MotionEvent motionEvent) {
-        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-            Logger.log("touch down");
-            return true;
-        }
-
-        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            Logger.log("touch up");
-            return true;
-        }
-
-        if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
-            Logger.log("touch moved");
-            return true;
-        }
-
+    	touchRotation.onTouchEvent(motionEvent);
         return super.onTouchEvent(motionEvent);
     }
 

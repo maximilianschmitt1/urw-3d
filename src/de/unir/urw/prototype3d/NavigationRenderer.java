@@ -6,9 +6,6 @@ import android.opengl.GLSurfaceView;
 import com.threed.jpct.Camera;
 import com.threed.jpct.FrameBuffer;
 import com.threed.jpct.Light;
-import com.threed.jpct.Logger;
-import com.threed.jpct.Object3D;
-import com.threed.jpct.Primitives;
 import com.threed.jpct.RGBColor;
 import com.threed.jpct.SimpleVector;
 import com.threed.jpct.Texture;
@@ -20,23 +17,13 @@ import com.threed.jpct.util.MemoryHelper;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class NavigationRenderer implements GLSurfaceView.Renderer {
+public class NavigationRenderer implements GLSurfaceView.Renderer, RotationListener {
     
     World world;
     FrameBuffer frameBuffer;
-    Light light;
-    Object3D cube;
     Drawable baseTexture;
     RGBColor backgroundColor = new RGBColor(50, 50, 100);
-    
-    private Object3D ground = null;
-	private Object3D path = null;
-	
-	public static final float PI = (float) Math.PI;
-
-    public NavigationRenderer(Drawable baseTexture) {
-        this.baseTexture = baseTexture;
-    }
+    Box path;
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -48,41 +35,29 @@ public class NavigationRenderer implements GLSurfaceView.Renderer {
 
         world = new World();
         world.setAmbientLight(20, 20, 20);
-
-        light = new Light(world);
-        light.setIntensity(250, 250, 250);
-
-        Texture texture = new Texture(BitmapHelper.rescale(BitmapHelper.convert(baseTexture), 64, 64));
-
-        if (!TextureManager.getInstance().containsTexture("texture")) {
-            TextureManager.getInstance().addTexture("texture", texture);
-        }
         
-        Box box = new Box(500,200,500);
-        box.calcTextureWrapSpherical();
-        box.setTexture("texture");
-        box.strip();
-        box.build();
+        path = new Box(200,5,500);
+        path.translate(-100, 00, 0);
+        path.strip();
+        path.build();
         
-		Logger.log("Ground  x: " + box.getTranslation().x + "y: " + box.getTranslation().y + "z: " + box.getTranslation().z);
+        Light light = new Light(world);
+		light.setIntensity(250, 250, 250);
 		
-
-		
-		//Logger.log("Path  x: " + path.getTranslation().x + "y: " + path.getTranslation().y + "z: " + path.getTranslation().z);
-
-        world.addObject(box);
-        //world.addObject(path);
+		SimpleVector lightPosition = new SimpleVector();
+        lightPosition.set(path.getTransformedCenter());
+        lightPosition.y -= 100;
+        lightPosition.z -= 100;
+        light.setPosition(lightPosition);
 
         Camera cam = world.getCamera();
         cam.moveCamera(Camera.CAMERA_MOVEOUT, 50);
-        cam.setFovAngle(PI/2);
-        cam.lookAt(box.getTransformedCenter());
+        cam.setOrientation(new SimpleVector(0, 0, 1), new SimpleVector(0, -1, 0));
+        cam.setPosition(0, -50, -200);
+        cam.rotateCameraX((float) (30 * Math.PI/180));
+        
+        world.addObject(path);
 
-        SimpleVector sv = new SimpleVector();
-        sv.set(box.getTransformedCenter());
-        sv.y -= 100;
-        sv.z -= 100;
-        light.setPosition(sv);
         MemoryHelper.compact();
     }
 
@@ -97,4 +72,10 @@ public class NavigationRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
     }
+
+	@Override
+	public void onRotation(float rotationX, float rotationY) {
+		path.rotateY(rotationY);
+		path.rotateX(rotationX);
+	}
 }
