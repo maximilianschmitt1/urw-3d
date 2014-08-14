@@ -5,8 +5,6 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.MotionEvent;
 
-import com.threed.jpct.Logger;
-
 public class Navigation3D extends Activity {
     private GLSurfaceView glSurfaceView;
     private NavigationRenderer navigationRenderer;
