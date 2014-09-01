@@ -14,7 +14,7 @@ public class Navigation3D extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        navigationRenderer = new NavigationRenderer();
+        navigationRenderer = new NavigationRenderer(this);
         touchRotation = new TouchRotation(navigationRenderer);
 
         glSurfaceView = new GLSurfaceView(getApplication());
